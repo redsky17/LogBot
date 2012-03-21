@@ -117,7 +117,7 @@ public class Main extends PircBot {
 			sendMessage(channel, "The link to the log files is: " + link); //if it is it simply sends a message to the server
 		}
 		if (message.toLowerCase().startsWith("!paste")) { //checks if it is the
-			String[] split = message.split(" ");
+			String[] split = message.split(" "); //splits the string
 			if (split.length <= 1) {
 				sendMessage(channel, "You need a number!");
 			} else {
