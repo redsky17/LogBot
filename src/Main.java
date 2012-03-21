@@ -17,7 +17,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
-import java.util.Timer;
 
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
@@ -26,10 +25,8 @@ import org.jibble.pircbot.User;
 
 public class Main extends PircBot {
 
-	/**
-	 * @param args
-	 */
-	Timer timer;
+
+
 	String nick;
 	String login;
 	String server;
@@ -41,17 +38,9 @@ public class Main extends PircBot {
 	public static String folder;
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		try {
 			new Main();
-		} catch (NickAlreadyInUseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IrcException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -70,49 +59,39 @@ public class Main extends PircBot {
 	}
 
 	public Main() throws NickAlreadyInUseException, IOException, IrcException {
-		// previous.add("stupid");
-		loadVars();
+		
+		loadVars(); //loads the variables from the config
 
-		this.setName(nick);
-		this.setLogin(login);
+		this.setName(nick); //sets the nickname
+		this.setLogin(login); //sets the login (The part before the hostname: login@111.222.121.110)
 
-		this.setVerbose(true);
+		this.setVerbose(true); //sets there to be output on IRC events, should be disabled on production if you really want.
 
-		// this.joinChannel("#tf2wh");
+		
 		this.setMessageDelay(500);
 		join();
 	}
 
-	public void join() {
+	public void join() { //this is used to be recycable to be used at first connect and if the bot gets disconnected
 		try {
-			this.connect(server);
-		} catch (NickAlreadyInUseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IrcException e) {
-			// TODO Auto-generated catch block
+			this.connect(server); //tries to connect to the irc server
+		} catch (Exception e) {
+			
 			e.printStackTrace();
 		}
-		this.joinChannel(ircchannel);
+		this.joinChannel(ircchannel); //joins the irc channel
 		if (!nickserv.equalsIgnoreCase("pleasereplace")
-				&& !nickserv.equalsIgnoreCase("")) {
+				&& !nickserv.equalsIgnoreCase("")) { //checks if there is a nickserv password set, if there is it will attempt to auth.
 			this.identify(nickserv);
 		}
 	}
 
 	public void onJoin(String channel, String sender, String login,
 			String hostname) {
-		TextListing.addEntry("### " + sender + " has joined " + channel);
+		TextListing.addEntry("### " + sender + " has joined " + channel); //adds entry to logs when user joins
 	}
 
-	// add on name change!
-
-	Random random = new Random();
-
-	public boolean isOp(String sender, String channel) {
+	public boolean isOp(String sender, String channel) { //checks if the specified user on the specified channel is an op.
 
 		User users[] = getUsers(channel);
 		User u = null;
@@ -132,12 +111,12 @@ public class Main extends PircBot {
 	}
 
 	public void onMessage(String channel, String sender, String login,
-			String hostname, String message) {
-		TextListing.addEntry("<" + sender + "> " + message);
-		if (message.toLowerCase().startsWith("!logs")) {
-			sendMessage(channel, "The link to the log files is: " + link);
+			String hostname, String message) { //event when a conventional message is sent
+		TextListing.addEntry("<" + sender + "> " + message); //logs it
+		if (message.toLowerCase().startsWith("!logs")) { //checks if it is the !logs commands
+			sendMessage(channel, "The link to the log files is: " + link); //if it is it simply sends a message to the server
 		}
-		if (message.toLowerCase().startsWith("!paste")) {
+		if (message.toLowerCase().startsWith("!paste")) { //checks if it is the
 			String[] split = message.split(" ");
 			if (split.length <= 1) {
 				sendMessage(channel, "You need a number!");
@@ -171,7 +150,7 @@ public class Main extends PircBot {
 										.encode(textListGet.get(i), "UTF-8")
 								+ System.getProperty("line.separator");
 					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}
 				}
