@@ -88,12 +88,12 @@ public class Main extends PircBot {
 
 	public void onJoin(String channel, String sender, String login,
 			String hostname) {
-		TextListing.addEntry("### " + sender + " has joined " + channel); //adds entry to logs when user joins
+		LogEditor.addEntry("### " + sender + " has joined " + channel); //adds entry to logs when user joins
 	}
 
 	public boolean isOp(String sender, String channel) { //checks if the specified user on the specified channel is an op.
 
-		User users[] = getUsers(channel);
+		User users[] = getUsers(channel); //list of users
 		User u = null;
 		for (User user : users) {
 			if (sender.equals(user.getNick())) {
@@ -112,7 +112,7 @@ public class Main extends PircBot {
 
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) { //event when a conventional message is sent
-		TextListing.addEntry("<" + sender + "> " + message); //logs it
+		LogEditor.addEntry("<" + sender + "> " + message); //logs it
 		if (message.toLowerCase().startsWith("!logs")) { //checks if it is the !logs commands
 			sendMessage(channel, "The link to the log files is: " + link); //if it is it simply sends a message to the server
 		}
@@ -134,8 +134,8 @@ public class Main extends PircBot {
 					try{
 						count = Integer.parseInt(split[1]);
 					}catch(Exception e){
-						sendMessage(channel, "Looks like that isn't an integer! Try again.");
-						return;
+						sendMessage(channel, "Looks like that isn't an integer! Try again."); //sends a message if it isn't an integer
+						return; //exits so it won't continue rying to get the logs
 					}
 				
 				}
@@ -268,7 +268,7 @@ public class Main extends PircBot {
 
 	public void onKick(String channel, String kickerNick, String kickerLogin,
 			String kickerHostname, String recipientNick, String reason) {
-		TextListing.addEntry("### " + recipientNick + " was kicked from "
+		LogEditor.addEntry("### " + recipientNick + " was kicked from "
 				+ channel + " by " + kickerNick + " (" + reason + ")");
 		if (recipientNick.equalsIgnoreCase(nick)) {
 			this.joinChannel(ircchannel);
@@ -283,26 +283,26 @@ public class Main extends PircBot {
 
 	public void onNickChange(String oldNick, String login, String hostname,
 			String newNick) {
-		TextListing.addEntry("### " + oldNick + " is now known as " + newNick);
+		LogEditor.addEntry("### " + oldNick + " is now known as " + newNick);
 	}
 
 	public void onNotice(String sourceNick, String sourceLogin,
 			String sourceHostname, String target, String notice) {
 		if (!target.equalsIgnoreCase("notice")
 				&& !target.equalsIgnoreCase(nick)) {
-			TextListing.addEntry("### NOTICE: <" + sourceNick + "> " + notice);
+			LogEditor.addEntry("### NOTICE: <" + sourceNick + "> " + notice);
 		}
 	}
 
 	public void onPart(String channel, String sender, String login,
 			String hostname) {
-		TextListing.addEntry("### " + sender
+		LogEditor.addEntry("### " + sender
 				+ " has parted (left) the channel.");
 	}
 
 	public void onQuit(String sourceNick, String sourceLogin,
 			String sourceHostname, String reason) {
-		TextListing.addEntry("### " + sourceNick + " has quit the server. ("
+		LogEditor.addEntry("### " + sourceNick + " has quit the server. ("
 				+ reason + ")");
 	}
 

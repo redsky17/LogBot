@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class TextListing {
+public class LogEditor {
 	public static void addEntry(String entry) {
 		try{
 			File f = new File(Main.folder);
