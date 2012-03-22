@@ -94,7 +94,7 @@ public class Main extends PircBot {
 		if(uploadOnJoin){
 		try {
 			Runtime.getRuntime().exec(command); //executes the given command from config.
-			sendMessage(channel, "Attempted the upload.");
+			//sendMessage(channel, "Attempted the upload.");
 		} catch (IOException e) {
 		
 			e.printStackTrace();
