@@ -33,6 +33,7 @@ public class Main extends PircBot {
 	String link;
 	String command;
 	String reloadnick;
+	boolean uploadOnJoin;
 	public static String prefix;
 	public static String folder;
 
@@ -56,6 +57,7 @@ public class Main extends PircBot {
 		prefix = loadProp("LogPrefix", "log_");
 		folder = loadProp("LogDir", "logs");
 		reloadnick = loadProp("ManagerNick"); //he who can reload
+		uploadOnJoin = (Boolean)loadProp("UploadOnJoin", "true", "boolean");
 	}
 
 	public Main() throws NickAlreadyInUseException, IOException, IrcException {
@@ -89,6 +91,15 @@ public class Main extends PircBot {
 	public void onJoin(String channel, String sender, String login,
 			String hostname) {
 		LogEditor.addEntry("### " + sender + " has joined " + channel); //adds entry to logs when user joins
+		if(uploadOnJoin){
+		try {
+			Runtime.getRuntime().exec(command); //executes the given command from config.
+			sendMessage(channel, "Attempted the upload.");
+		} catch (IOException e) {
+		
+			e.printStackTrace();
+		}
+		}
 	}
 
 	public boolean isOp(String sender, String channel) { //checks if the specified user on the specified channel is an op.
@@ -337,5 +348,32 @@ public class Main extends PircBot {
 			return null;
 		}
 
+	}
+	public static Object loadProp(String prop, String shouldbe, String type) {
+		String input = loadProp(prop,shouldbe);
+		if (type.equalsIgnoreCase("boolean")) {
+			if (input.equalsIgnoreCase("true")) {
+				System.out.println("Returns true");
+				return true;
+			} else {
+				if (input.equalsIgnoreCase("false")) {
+
+					return false;
+				} else {
+					
+					System.out.println("INVALID, RETURNING FALSE");
+					return false;
+				}
+			}
+
+		}
+		if (type.equalsIgnoreCase("int")) {
+			try {
+				return Integer.parseInt(input);
+			} catch (Exception e) {
+				return 0;
+			}
+		}
+		return false;
 	}
 }
