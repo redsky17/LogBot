@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
-
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
@@ -34,28 +32,30 @@ public class Main extends PircBot {
 	String nickserv;
 	String link;
 	String command;
+	String reloadnick;
 	public static String prefix;
 	public static String folder;
 
 	public static void main(String[] args) {
 		try {
-			new Main();
+			new Main(); // main start!
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void loadVars() {
+	public void loadVars() { //sets the varaibles to what is in the config, can be used to reload the variables while bot is running.
 		nick = loadProp("Nickname", "LogiiBot");
 		login = loadProp("Login", "log");
-		server = loadProp("IRCServer", "irc.freenode.net");
-		ircchannel = loadProp("Channel", "##reddit-android-developers");
+		server = loadProp("IRCServer", "irc.freenode.net"); //the server, no port right now
+		ircchannel = loadProp("Channel", "##reddit-android-developers"); //the channel
 		nickserv = loadProp("NickservPass");
 		link = loadProp("Link",
-				"https://github.com/RedditAndroidDev/IRC_Logs/tree/master/logs");
+				"https://github.com/RedditAndroidDev/IRC_Logs/tree/master/logs"); // link to the logs
 		command = loadProp("Command");
 		prefix = loadProp("LogPrefix", "log_");
 		folder = loadProp("LogDir", "logs");
+		reloadnick = loadProp("ManagerNick"); //he who can reload
 	}
 
 	public Main() throws NickAlreadyInUseException, IOException, IrcException {
@@ -119,36 +119,38 @@ public class Main extends PircBot {
 		if (message.toLowerCase().startsWith("!paste")) { //checks if it is the
 			String[] split = message.split(" "); //splits the string
 			if (split.length <= 1) {
-				sendMessage(channel, "You need a number!");
+				sendMessage(channel, "You need a number!"); //You need a number!
 			} else {
 
-				String full = "";
-				List<String> textListGet = loadLogToList(getCurrentFolder()
-						+ getCurrentLogName());
-				int count = 0;
+
+				String full = ""; //initial string
+				List<String> textListGet = loadLogToList(getCurrentFolder() 
+						+ getCurrentLogName()); //loads the current day log as a List
+				int count = 0; //count of how many to get
 			
 				if (textListGet.size() < Integer.parseInt(split[1])
-						|| split[1].equalsIgnoreCase("-1")) {
+						|| split[1].equalsIgnoreCase("-1")) { //want all of the logs today
 					count = textListGet.size()-1;
 				} else {
 					try{
 						count = Integer.parseInt(split[1]);
 					}catch(Exception e){
 						sendMessage(channel, "Looks like that isn't an integer! Try again."); //sends a message if it isn't an integer
-						return; //exits so it won't continue rying to get the logs
+						return; //exits so it won't continue trying to get the logs
 					}
 				
 				}
 
 		
-				for (int i = textListGet.size() - count - 1; i < textListGet // thanks
+				for (int i = textListGet.size() - count - 1; i < textListGet // thanks to red_sky for this code: mind-block
 						.size() - 1; i++) {
 					// i =
+					
 					try {
-						full = full
-								+ URLEncoder
-										.encode(textListGet.get(i), "UTF-8")
-								+ System.getProperty("line.separator");
+					
+						full += URLEncoder
+										.encode(textListGet.get(i), "UTF-8") //encodes to UTF8 so won't fail when uploading containing special characters, most notably ;
+								+ System.getProperty("line.separator"); // new line!
 					} catch (UnsupportedEncodingException e) {
 					
 						e.printStackTrace();
@@ -163,15 +165,15 @@ public class Main extends PircBot {
 			}
 
 		}
-		if (message.toLowerCase().startsWith("!upload")) {
+		if (message.toLowerCase().startsWith("!upload")) { //will force the upload of logs (if there is a command that has been set in the config to do so.
 			if (!command.equalsIgnoreCase("pleasereplace")
 					&& !command.equalsIgnoreCase("")) {
 				if (isOp(sender, channel)) {
 					try {
-						Runtime.getRuntime().exec(command);
+						Runtime.getRuntime().exec(command); //executes the given command from config.
 						sendMessage(channel, "Attempted the upload.");
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}
 				}
@@ -180,18 +182,18 @@ public class Main extends PircBot {
 
 	}
 
-	public String getCurrentLogName() {
+	public String getCurrentLogName() { //gets the current day log
 		Calendar currentDate = Calendar.getInstance();
-		SimpleDateFormat formatter = new SimpleDateFormat("dd.MMM.yyyy");
+		SimpleDateFormat formatter = new SimpleDateFormat("dd.MMM.yyyy"); //day in the format: 17.06.2005
 		String dateNow = formatter.format(currentDate.getTime());
 		return Main.prefix + "" + dateNow + ".txt";
 	}
 
-	public String getCurrentFolder() {
+	public String getCurrentFolder() { //gets the log folder, only special because it has the file.seperator
 		return Main.folder + "" + System.getProperty("file.separator");
 	}
 
-	public List<String> loadLogToList(String dest) {
+	public List<String> loadLogToList(String dest) { //loads the select log to a list file
 		List<String> textlist = new ArrayList<String>();
 		try {
 			// Open the file that is the first
@@ -215,19 +217,19 @@ public class Main extends PircBot {
 	}
 
 	public void onPrivateMessage(String sender, String login, String hostname,
-			String message) {
-		if (message.toLowerCase().startsWith("!upload")
-				&& sender.equalsIgnoreCase("red_sky")) {
-			loadVars();
+			String message) { //on a private message (/msg)
+		if (message.toLowerCase().startsWith("!reload")
+				&& sender.equalsIgnoreCase(reloadnick) && !reloadnick.equalsIgnoreCase("pleasereplace")) { 
+			loadVars(); //reloads the variables from config
 		}
 	}
 
 	public void onDisconnect() {
 
-		join();
+		join(); //rejoins server and channel when disconnected
 	}
 
-	public String sendPostRequest(String url2, String data) {
+	public String sendPostRequest(String url2, String data) { //sends a POST request to a specified url with the specified data
 
 		// Build parameter string
 
@@ -267,46 +269,46 @@ public class Main extends PircBot {
 	}
 
 	public void onKick(String channel, String kickerNick, String kickerLogin,
-			String kickerHostname, String recipientNick, String reason) {
+			String kickerHostname, String recipientNick, String reason) { //on someone, even the bot gets kicked
 		LogEditor.addEntry("### " + recipientNick + " was kicked from "
-				+ channel + " by " + kickerNick + " (" + reason + ")");
-		if (recipientNick.equalsIgnoreCase(nick)) {
-			this.joinChannel(ircchannel);
-			sendMessage(channel, kickerNick + ": Why, just... why?");
+				+ channel + " by " + kickerNick + " (" + reason + ")"); //adds to log
+		if (recipientNick.equalsIgnoreCase(nick)) { //checks it isn't the bot
+			this.joinChannel(ircchannel); //if it is attempts a single rejoin
+			sendMessage(channel, kickerNick + ": Why, just... why?"); //guilt-trip
 		}
 	}
 
 	public static String loadProp(String prop) {
-		return loadProp(prop, "pleasereplace");
+		return loadProp(prop, "pleasereplace"); //comeon user, you gotta replace this in the config, it calls for you
 
 	}
 
 	public void onNickChange(String oldNick, String login, String hostname,
-			String newNick) {
-		LogEditor.addEntry("### " + oldNick + " is now known as " + newNick);
+			String newNick) { // a nick changed!
+		LogEditor.addEntry("### " + oldNick + " is now known as " + newNick); //adds to log
 	}
 
 	public void onNotice(String sourceNick, String sourceLogin,
-			String sourceHostname, String target, String notice) {
-		if (!target.equalsIgnoreCase("notice")
+			String sourceHostname, String target, String notice) { // a notice!
+		if (!target.equalsIgnoreCase("notice") //makes sure it isn't the server connect notices, we don't need those
 				&& !target.equalsIgnoreCase(nick)) {
-			LogEditor.addEntry("### NOTICE: <" + sourceNick + "> " + notice);
+			LogEditor.addEntry("### NOTICE: <" + sourceNick + "> " + notice); //add to log
 		}
 	}
 
 	public void onPart(String channel, String sender, String login,
-			String hostname) {
+			String hostname) { //when someone leaves the channel (not to be confused with quitting the server)
 		LogEditor.addEntry("### " + sender
-				+ " has parted (left) the channel.");
+				+ " has parted (left) the channel."); //add logs
 	}
 
 	public void onQuit(String sourceNick, String sourceLogin,
-			String sourceHostname, String reason) {
+			String sourceHostname, String reason) { //someone left the server
 		LogEditor.addEntry("### " + sourceNick + " has quit the server. ("
-				+ reason + ")");
+				+ reason + ")"); //add logs
 	}
 
-	public static String loadProp(String prop, String shouldbe) {
+	public static String loadProp(String prop, String shouldbe) { // loads the properties file (config.txt) and updates it/makes it if needed.
 		File file = new File("config.txt");
 
 		// Does the file already exist
@@ -326,7 +328,7 @@ public class Main extends PircBot {
 				properties.setProperty(prop, shouldbe);
 			}
 			properties.store(new FileOutputStream(file),
-					"Set the settings accordingly.");
+					"Set the settings accordingly. The pleasereplace values should be replaced but they are not crucial to the functionality of the bot.");
 
 			return toreturn;
 		} catch (Exception e) {

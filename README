@@ -1,3 +1,8 @@
 A simple IRC logging bot that resides in the single channel that is in the config.
 
 This bot was originally made for ##reddit-android-developers on freenode but it can be used anywhere else
+
+The config file gets auto-generated on first-start, try and replace the values called "pleasereplace" if 
+applicable, hopefully the keys should be mostly self-explaining.
+
+This bot requires the PIRCbot library that can be found at http://www.jibble.org/pircbot.php
