@@ -87,7 +87,7 @@ public class Main extends PircBot {
 			this.identify(nickserv);
 		}
 	}
-
+        @Override
 	public void onJoin(String channel, String sender, String login,
 			String hostname) {
 		LogEditor.addEntry("### " + sender + " has joined " + channel); //adds entry to logs when user joins
@@ -120,7 +120,7 @@ public class Main extends PircBot {
 
 		return false;
 	}
-
+        @Override
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) { //event when a conventional message is sent
 		LogEditor.addEntry("<" + sender + "> " + message); //logs it
@@ -190,6 +190,17 @@ public class Main extends PircBot {
 				}
 			}
 		}
+		
+		if (message.toLowerCase().startsWith("!join") && 
+			sender.equalsIgnoreCase(reloadnick) && !reloadnick.equalsIgnoreCase("pleasereplace")) { //will join the channel specified if the user issuing the command is the master specified in the config file
+				String[] split = message.split(" ");
+				if (split.length <= 1) {
+					sendMessage(sender, "You must specify a channel to join!");
+				}
+				else {
+					this.joinChannel(split[1]);
+				}
+		}
 
 	}
 
@@ -227,14 +238,27 @@ public class Main extends PircBot {
 		return textlist;
 	}
 
+        @Override
 	public void onPrivateMessage(String sender, String login, String hostname,
 			String message) { //on a private message (/msg)
 		if (message.toLowerCase().startsWith("!reload")
 				&& sender.equalsIgnoreCase(reloadnick) && !reloadnick.equalsIgnoreCase("pleasereplace")) { 
 			loadVars(); //reloads the variables from config
 		}
+		
+		if (message.toLowerCase().startsWith("!join") && 
+			sender.equalsIgnoreCase(reloadnick) && !reloadnick.equalsIgnoreCase("pleasereplace")) { //will join the channel specified if the user issuing the command is the master specified in the config file
+				String[] split = message.split(" ");
+				if (split.length <= 1) {
+					sendMessage(sender, "You must specify a channel to join!");
+				}
+				else {
+					this.joinChannel(split[1]);
+				}
+}
 	}
 
+    @Override
 	public void onDisconnect() {
 
 		join(); //rejoins server and channel when disconnected
@@ -279,6 +303,7 @@ public class Main extends PircBot {
 		return null;
 	}
 
+        @Override
 	public void onKick(String channel, String kickerNick, String kickerLogin,
 			String kickerHostname, String recipientNick, String reason) { //on someone, even the bot gets kicked
 		LogEditor.addEntry("### " + recipientNick + " was kicked from "
@@ -293,12 +318,12 @@ public class Main extends PircBot {
 		return loadProp(prop, "pleasereplace"); //comeon user, you gotta replace this in the config, it calls for you
 
 	}
-
+        @Override
 	public void onNickChange(String oldNick, String login, String hostname,
 			String newNick) { // a nick changed!
 		LogEditor.addEntry("### " + oldNick + " is now known as " + newNick); //adds to log
 	}
-
+        @Override
 	public void onNotice(String sourceNick, String sourceLogin,
 			String sourceHostname, String target, String notice) { // a notice!
 		if (!target.equalsIgnoreCase("notice") //makes sure it isn't the server connect notices, we don't need those
@@ -306,13 +331,13 @@ public class Main extends PircBot {
 			LogEditor.addEntry("### NOTICE: <" + sourceNick + "> " + notice); //add to log
 		}
 	}
-
+        @Override
 	public void onPart(String channel, String sender, String login,
 			String hostname) { //when someone leaves the channel (not to be confused with quitting the server)
 		LogEditor.addEntry("### " + sender
 				+ " has parted (left) the channel."); //add logs
 	}
-
+        @Override
 	public void onQuit(String sourceNick, String sourceLogin,
 			String sourceHostname, String reason) { //someone left the server
 		LogEditor.addEntry("### " + sourceNick + " has quit the server. ("

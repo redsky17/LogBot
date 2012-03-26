@@ -27,5 +27,5 @@ public class LogEditor {
 			  System.err.println("Error: " + e.getMessage());
 			  }
 	
-}
+	}
 }
